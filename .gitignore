@@ -1,0 +1,16 @@
+# 1. Python 运行缓存
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 2. 核心隐私与系统数据 (绝对禁止上传)
+backend/uploads/
+backend/data/
+backend/chroma_data/
+*.db
+*.sqlite3
+
+# 3. 环境变量与系统垃圾
+.env
+.DS_Store
+Thumbs.db
