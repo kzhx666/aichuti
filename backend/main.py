@@ -35,12 +35,15 @@ class DownloadRequest(BaseModel):
     markdown_text: str
     mode: str
 
+class CreateFolderRequest(BaseModel):
+    category: str
+
 class DeleteRequest(BaseModel):
     category: str
 
-# 👉 新增创建文件夹的数据结构
-class CreateFolderRequest(BaseModel):
+class DeleteDocRequest(BaseModel):
     category: str
+    filename: str
 
 def create_exam_word(markdown_content, mode='student'):
     doc = docx.Document()
@@ -108,8 +111,9 @@ def create_exam_word(markdown_content, mode='student'):
 
 @app.post("/verify_api/")
 def verify_api(config: VerifyConfig):
-    client = openai.OpenAI(api_key=config.api_key, base_url=config.api_url, timeout=10.0)
+    # 👉 修复：将 client 的初始化移入 try 块，并彻底移除导致崩溃的 timeout 参数
     try:
+        client = openai.OpenAI(api_key=config.api_key, base_url=config.api_url)
         client.chat.completions.create(model=config.model_name, messages=[{"role":"user","content":"Hi"}], max_tokens=5)
         return {"status": "success", "message": "连接成功！主线程畅通！"}
     except Exception as e:
@@ -121,11 +125,8 @@ def list_folders():
     if not os.path.exists(base_path):
         os.makedirs(base_path, exist_ok=True)
     folders = [f for f in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, f))]
-    if "建筑材料" not in folders:
-        folders.insert(0, "建筑材料")
     return {"folders": folders}
 
-# 👉 新增接口：真正让服务器端物理创建分类文件夹
 @app.post("/create_folder/")
 def create_folder(req: CreateFolderRequest):
     folder_path = f"/app/uploads/{req.category}"
@@ -154,9 +155,15 @@ def delete_folder(req: DeleteRequest):
         shutil.rmtree(folder_path)
     return {"message": "分类及其文件已彻底删除"}
 
+@app.post("/delete_doc/")
+def delete_document(req: DeleteDocRequest):
+    file_path = f"/app/uploads/{req.category}/{req.filename}"
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    return {"message": "文件物理删除成功"}
+
 @app.post("/generate_exam/")
 async def generate_exam(config: TeacherConfig):
-    client = AsyncOpenAI(api_key=config.api_key, base_url=config.api_url, timeout=1200.0)
     folder_path = f"/app/uploads/{config.category}"
     
     async def exam_generator():
@@ -211,6 +218,8 @@ async def generate_exam(config: TeacherConfig):
         yield "> 🧠 **资料已输入大模型，正在结合知识点进行全局思考...**\n\n---\n\n"
 
         try:
+            # 👉 修复：将 client 的初始化移入 try 块，并彻底移除导致崩溃的 timeout 参数
+            client = AsyncOpenAI(api_key=config.api_key, base_url=config.api_url)
             api_task = asyncio.create_task(
                 client.chat.completions.create(
                     model=config.model_name,
@@ -241,13 +250,3 @@ async def generate_exam(config: TeacherConfig):
             yield f"\n\n"
 
     return StreamingResponse(exam_generator(), media_type="text/plain")
-
-@app.post("/download_word/")
-def download_word(req: DownloadRequest):
-    file_stream = create_exam_word(req.markdown_text, req.mode)
-    filename = "student_exam.docx" if req.mode == 'student' else "teacher_exam.docx"
-    return Response(
-        content=file_stream.getvalue(),
-        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
-    )
