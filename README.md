@@ -5,12 +5,20 @@
 </p>
 
 <p align="center">
-  <a href="[https://github.com/kzhx666/aichuti/stargazers](https://github.com/kzhx666/aichuti/stargazers)"><img src="[https://img.shields.io/github/stars/kzhx666/aichuti?style=flat-square&color=yellow](https://img.shields.io/github/stars/kzhx666/aichuti?style=flat-square&color=yellow)" alt="Stars"></a>
-  <a href="[https://github.com/kzhx666/aichuti/network/members](https://github.com/kzhx666/aichuti/network/members)"><img src="[https://img.shields.io/github/forks/kzhx666/aichuti?style=flat-square&color=blue](https://img.shields.io/github/forks/kzhx666/aichuti?style=flat-square&color=blue)" alt="Forks"></a>
-  <a href="[https://github.com/kzhx666/aichuti/issues](https://github.com/kzhx666/aichuti/issues)"><img src="[https://img.shields.io/github/issues/kzhx666/aichuti?style=flat-square&color=red](https://img.shields.io/github/issues/kzhx666/aichuti?style=flat-square&color=red)" alt="Issues"></a>
-  <img src="[https://img.shields.io/badge/Docker-Supported-2496ED?style=flat-square&logo=docker](https://img.shields.io/badge/Docker-Supported-2496ED?style=flat-square&logo=docker)" alt="Docker">
-  <img src="[https://img.shields.io/badge/Model-DeepSeek/Kimi-67C23A?style=flat-square](https://img.shields.io/badge/Model-DeepSeek/Kimi-67C23A?style=flat-square)" alt="AI">
-  <a href="[https://opensource.org/licenses/MIT](https://opensource.org/licenses/MIT)"><img src="[https://img.shields.io/badge/License-MIT-success?style=flat-square](https://img.shields.io/badge/License-MIT-success?style=flat-square)" alt="License"></a>
+  <a href="https://github.com/kzhx666/aichuti/stargazers">
+    <img src="https://img.shields.io/github/stars/kzhx666/aichuti?style=flat-square&color=yellow" alt="Stars">
+  </a>
+  <a href="https://github.com/kzhx666/aichuti/network/members">
+    <img src="https://img.shields.io/github/forks/kzhx666/aichuti?style=flat-square&color=blue" alt="Forks">
+  </a>
+  <a href="https://github.com/kzhx666/aichuti/issues">
+    <img src="https://img.shields.io/github/issues/kzhx666/aichuti?style=flat-square&color=red" alt="Issues">
+  </a>
+  ![Docker](https://img.shields.io/badge/Docker-Supported-2496ED?style=flat-square&logo=docker)
+  ![AI](https://img.shields.io/badge/Model-DeepSeek/Kimi-67C23A?style=flat-square)
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-success?style=flat-square" alt="License">
+  </a>
 </p>
 
 ---
@@ -75,7 +83,7 @@ graph TD
 ### ⚡ 2. 一键拉取与运行
 
 ````bash
-git clone https://github.com/kzhx666/aichuti.git
+git clone [https://github.com/kzhx666/aichuti.git](https://github.com/kzhx666/aichuti.git)
 cd aichuti
 docker-compose up -d --build
 ````
