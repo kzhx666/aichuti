@@ -94,12 +94,12 @@ docker-compose up -d --build
 ````text
 aichuti/
 ├── backend/
+│   ├── uploads/                # 资料存放物理目录
 │   ├── main.py             # 核心逻辑 (沙箱、质检、防断流)
 │   └── ...
 ├── frontend/
 │   ├── index.html          # 前端交互 (全净渲染引擎)
 │   └── assets/             # Vue/Element-Plus 等静态资源
-├── uploads/                # 资料存放物理目录
 ├── docker-compose.yml      # 容器编排
 └── README.md               # 项目说明
 ````
