@@ -94,7 +94,7 @@ docker-compose up -d --build
 ````text
 aichuti/
 ├── backend/
-│   ├── uploads/                # 资料存放物理目录
+│   ├── uploads/            # 资料存放物理目录
 │   ├── main.py             # 核心逻辑 (沙箱、质检、防断流)
 │   └── ...
 ├── frontend/
