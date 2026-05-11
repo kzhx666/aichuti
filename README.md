@@ -82,7 +82,7 @@ docker-compose up -d --build
 
 ### 🎯 3. 初始化配置
 
-* 访问：`http://您的IP:8000`
+* 访问：`http://您的IP:3003`
 * 初始密码：`123456`
 * 进入 **API 配置** 页面，填写您的 Kimi/DeepSeek API Key。
 
@@ -93,7 +93,7 @@ docker-compose up -d --build
 | 操作系统 (OS) | 架构 | 状态 | 备注 |
 | :--- | :---: | :---: | :--- |
 | **Debian / Ubuntu** | AMD64/ARM64 | ✅ | 强烈推荐 |
-| **CentOS / RHEL** | AMD64 | ✅ | 需关闭防火墙或开放 8000 端口 |
+| **CentOS / RHEL** | AMD64 | ✅ | 需关闭防火墙或开放 3003 端口 |
 | **Windows / macOS** | x86/ARM | ✅ | 需安装 Docker Desktop |
 
 ---
