@@ -15,6 +15,7 @@ import re
 import pdfplumber
 from PIL import Image
 import pytesseract
+import binascii
 
 app = FastAPI()
 
@@ -45,6 +46,46 @@ class DeleteDocRequest(BaseModel):
     category: str
     filename: str
 
+def clean_xml_chars(text):
+    return re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f]', '', text)
+
+# 👉 核心引擎：LaTeX 到 Word 的翻译器
+def add_math_to_paragraph(paragraph, text, is_bold=False, font_color=None, font_size=None):
+    text = text.replace(r'\rho', 'ρ').replace(r'\mu', 'μ').replace(r'\alpha', 'α').replace(r'\beta', 'β')
+    text = text.replace(r'\times', '×').replace(r'\div', '÷').replace(r'\Delta', 'Δ')
+    text = re.sub(r'\\frac\{(.*?)\}\{(.*?)\}', r'\1/\2', text)
+    
+    # 兼容独立公式 $$
+    text = text.replace('$$', '$')
+    
+    chunks = text.split('$')
+    for i, chunk in enumerate(chunks):
+        if not chunk: continue
+        if i % 2 == 0:
+            # 普通文本
+            r = paragraph.add_run(chunk)
+            r.bold = is_bold
+            if font_color: r.font.color.rgb = font_color
+            if font_size: r.font.size = font_size
+        else:
+            # LaTeX 文本解析上下标
+            pieces = re.split(r'(_\{.*?\}|_[a-zA-Z0-9]|\^\{.*?\}|\^[a-zA-Z0-9])', chunk)
+            for piece in pieces:
+                if not piece: continue
+                r = paragraph.add_run()
+                r.bold = is_bold
+                if font_color: r.font.color.rgb = font_color
+                if font_size: r.font.size = font_size
+                
+                if piece.startswith('_'):
+                    r.font.subscript = True
+                    r.text = piece[1:].strip('{}')
+                elif piece.startswith('^'):
+                    r.font.superscript = True
+                    r.text = piece[1:].strip('{}')
+                else:
+                    r.text = piece
+
 def create_exam_word(markdown_content, mode='student'):
     doc = docx.Document()
     style = doc.styles['Normal']
@@ -55,54 +96,65 @@ def create_exam_word(markdown_content, mode='student'):
     h = doc.add_heading(title, 0)
     h.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    questions = re.findall(r'\*\*(\d+)\.\s+\[(.*?)\]\*\*(.*?)(<details>.*?</details>)', markdown_content, re.S)
-    
-    if not questions:
-        doc.add_paragraph("⚠️ 提示：试卷解析失败，AI 未完全遵守排版格式，已回退为纯文本模式：\n")
-        doc.add_paragraph(markdown_content[:2000])
-    else:
-        for q_num, q_type, q_body, q_details in questions:
-            ans, desc = "", ""
-            ans_m = re.search(r'<b>答案：</b>\s*(.*?)\s*<span', q_details)
-            if ans_m: ans = ans_m.group(1).strip()
-            desc_m = re.search(r'<b>解析：</b>\s*(.*?)\s*</blockquote>', q_details, re.S)
-            if desc_m: desc = desc_m.group(1).strip()
+    markdown_content = clean_xml_chars(markdown_content)
 
-            q_body = q_body.strip()
-            q_body = re.sub(r'\n正确\s*\n错误\s*$', '', q_body).strip()
+    try:
+        questions = re.findall(r'\*\*(\d+)\.\s*[\[【](.*?)[\]】]\*\*(.*?)(<details>.*?</details>)', markdown_content, re.S)
+        
+        if not questions:
+            doc.add_paragraph("⚠️ 提示：系统未能精准识别大模型的排版格式，已为您自动回退为纯文本模式：\n")
+            for line in markdown_content.split('\n'):
+                if line.strip():
+                    doc.add_paragraph(line)
+        else:
+            for q_num, q_type, q_body, q_details in questions:
+                ans, desc = "", ""
+                ans_m = re.search(r'<b>答案：</b>\s*(.*?)\s*<span', q_details)
+                if ans_m: ans = ans_m.group(1).strip()
+                desc_m = re.search(r'<b>解析：</b>\s*(.*?)\s*</blockquote>', q_details, re.S)
+                if desc_m: desc = desc_m.group(1).strip()
 
-            stem, opts = q_body, ""
-            opt_match = re.search(r'\nA\..*', q_body, re.S)
-            if opt_match:
-                stem = q_body[:opt_match.start()].strip()
-                opts = opt_match.group(0).strip()
+                q_body = q_body.strip()
+                q_body = re.sub(r'\n正确\s*\n错误\s*$', '', q_body).strip()
 
-            p = doc.add_paragraph()
-            if mode == 'teacher':
-                p.add_run(f"{q_num}. [{q_type}] {stem} ( ").bold = True
-                ans_run = p.add_run(ans)
-                ans_run.font.color.rgb = RGBColor(255, 0, 0)
-                ans_run.bold = True
-                p.add_run(" )").bold = True
-            else:
-                p.add_run(f"{q_num}. [{q_type}] {stem} (    )").bold = True
+                stem, opts = q_body, ""
+                opt_match = re.search(r'\nA\..*', q_body, re.S)
+                if opt_match:
+                    stem = q_body[:opt_match.start()].strip()
+                    opts = opt_match.group(0).strip()
 
-            if opts:
-                opt_lines = [o.strip() for o in opts.split('\n') if o.strip()]
-                total_len = sum(len(o) for o in opt_lines)
-                if total_len < 30: 
-                    doc.add_paragraph("\t\t".join(opt_lines))
-                elif total_len < 60 and len(opt_lines) >= 4:
-                    doc.add_paragraph("\t\t".join(opt_lines[:2]))
-                    doc.add_paragraph("\t\t".join(opt_lines[2:]))
+                p = doc.add_paragraph()
+                if mode == 'teacher':
+                    add_math_to_paragraph(p, f"{q_num}. [{q_type}] {stem} ( ", is_bold=True)
+                    add_math_to_paragraph(p, ans, is_bold=True, font_color=RGBColor(255, 0, 0))
+                    add_math_to_paragraph(p, " )", is_bold=True)
                 else:
-                    for o in opt_lines: doc.add_paragraph(o)
+                    add_math_to_paragraph(p, f"{q_num}. [{q_type}] {stem} (    )", is_bold=True)
 
-            if mode == 'teacher' and desc:
-                desc_p = doc.add_paragraph()
-                r = desc_p.add_run(f"【解析】：{desc}")
-                r.font.color.rgb = RGBColor(255, 0, 0)
-                r.font.size = Pt(10)
+                if opts:
+                    opt_lines = [o.strip() for o in opts.split('\n') if o.strip()]
+                    total_len = sum(len(o) for o in opt_lines)
+                    if total_len < 30: 
+                        op = doc.add_paragraph()
+                        add_math_to_paragraph(op, "\t\t".join(opt_lines))
+                    elif total_len < 60 and len(opt_lines) >= 4:
+                        op1 = doc.add_paragraph()
+                        add_math_to_paragraph(op1, "\t\t".join(opt_lines[:2]))
+                        op2 = doc.add_paragraph()
+                        add_math_to_paragraph(op2, "\t\t".join(opt_lines[2:]))
+                    else:
+                        for o in opt_lines: 
+                            op = doc.add_paragraph()
+                            add_math_to_paragraph(op, o)
+
+                if mode == 'teacher' and desc:
+                    desc_p = doc.add_paragraph()
+                    add_math_to_paragraph(desc_p, f"【解析】：{desc}", font_color=RGBColor(255, 0, 0), font_size=Pt(10))
+    except Exception as e:
+        doc.add_paragraph(f"⚠️ 排版过程发生内部兼容性错误，已为您自动回退为纯文本模式 (Error: {str(e)})\n")
+        for line in markdown_content.split('\n'):
+            if line.strip():
+                doc.add_paragraph(line)
 
     file_stream = io.BytesIO()
     doc.save(file_stream)
@@ -111,7 +163,6 @@ def create_exam_word(markdown_content, mode='student'):
 
 @app.post("/verify_api/")
 def verify_api(config: VerifyConfig):
-    # 👉 修复：将 client 的初始化移入 try 块，并彻底移除导致崩溃的 timeout 参数
     try:
         client = openai.OpenAI(api_key=config.api_key, base_url=config.api_url)
         client.chat.completions.create(model=config.model_name, messages=[{"role":"user","content":"Hi"}], max_tokens=5)
@@ -168,7 +219,8 @@ async def generate_exam(config: TeacherConfig):
     
     async def exam_generator():
         docs_text = ""
-        yield "> 🚀 **系统启动：准备开始全量阅读资料库...**\n\n"
+        flush_padding = binascii.b2a_hex(os.urandom(2048)).decode('utf-8')
+        yield f"\n> 🚀 **系统启动：准备开始全量阅读资料库...**\n\n"
         
         if os.path.exists(folder_path):
             files = os.listdir(folder_path)
@@ -215,10 +267,9 @@ async def generate_exam(config: TeacherConfig):
             return
             
         yield f"> ✅ **所有资料均已一字不落阅读完毕！（共提取约 {len(docs_text)} 字符）**\n"
-        yield "> 🧠 **资料已输入大模型，正在结合知识点进行全局思考...**\n\n---\n\n"
+        yield "> 🧠 **资料已输入大模型，正在结合知识点进行全局思考... (大模型阅读上万字所需时间较长，请耐心等待)**\n\n---\n\n"
 
         try:
-            # 👉 修复：将 client 的初始化移入 try 块，并彻底移除导致崩溃的 timeout 参数
             client = AsyncOpenAI(api_key=config.api_key, base_url=config.api_url)
             api_task = asyncio.create_task(
                 client.chat.completions.create(
@@ -233,9 +284,10 @@ async def generate_exam(config: TeacherConfig):
             )
 
             while not api_task.done():
-                yield "\u200B"
+                heartbeat_padding = binascii.b2a_hex(os.urandom(512)).decode('utf-8')
+                yield f"\n"
                 try:
-                    await asyncio.wait_for(asyncio.shield(api_task), timeout=5.0)
+                    await asyncio.wait_for(asyncio.shield(api_task), timeout=2.0)
                 except asyncio.TimeoutError:
                     continue
 
@@ -249,4 +301,22 @@ async def generate_exam(config: TeacherConfig):
         except Exception as e:
             yield f"\n\n"
 
-    return StreamingResponse(exam_generator(), media_type="text/plain")
+    return StreamingResponse(
+        exam_generator(), 
+        media_type="text/event-stream",
+        headers={
+            "X-Accel-Buffering": "no",
+            "Cache-Control": "no-cache, no-transform",
+            "Connection": "keep-alive"
+        }
+    )
+
+@app.post("/download_word/")
+def download_word(req: DownloadRequest):
+    file_stream = create_exam_word(req.markdown_text, req.mode)
+    filename = "student_exam.docx" if req.mode == 'student' else "teacher_exam.docx"
+    return Response(
+        content=file_stream.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
