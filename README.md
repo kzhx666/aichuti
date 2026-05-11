@@ -1,25 +1,8 @@
-<h1 align="center">AI 出题中心 (AI Exam Generator) V2.5</h1>
+# 🎯 AI 出题中心 (AI Exam Generator) V2.5
 
-<p align="center">
-  🚀 专为中职教育打造的工业级 AI 试卷生成系统。基于双大模型驱动，独创无尘沙箱质检机制，解决长文本截断与排版难题。
-</p>
+> 🚀 **专为中职教育打造的工业级 AI 试卷生成系统**。基于双大模型驱动，独创无尘沙箱质检机制，彻底解决大模型长文本截断与排版难题。
 
-<p align="center">
-  <a href="https://github.com/kzhx666/aichuti/stargazers">
-    <img src="https://img.shields.io/github/stars/kzhx666/aichuti?style=flat-square&color=yellow" alt="Stars">
-  </a>
-  <a href="https://github.com/kzhx666/aichuti/network/members">
-    <img src="https://img.shields.io/github/forks/kzhx666/aichuti?style=flat-square&color=blue" alt="Forks">
-  </a>
-  <a href="https://github.com/kzhx666/aichuti/issues">
-    <img src="https://img.shields.io/github/issues/kzhx666/aichuti?style=flat-square&color=red" alt="Issues">
-  </a>
-  ![Docker](https://img.shields.io/badge/Docker-Supported-2496ED?style=flat-square&logo=docker)
-  ![AI](https://img.shields.io/badge/Model-DeepSeek/Kimi-67C23A?style=flat-square)
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-success?style=flat-square" alt="License">
-  </a>
-</p>
+[![Stars](https://img.shields.io/github/stars/kzhx666/aichuti?style=flat-square&color=yellow)](https://github.com/kzhx666/aichuti/stargazers) [![Forks](https://img.shields.io/github/forks/kzhx666/aichuti?style=flat-square&color=blue)](https://github.com/kzhx666/aichuti/network/members) [![Issues](https://img.shields.io/github/issues/kzhx666/aichuti?style=flat-square&color=red)](https://github.com/kzhx666/aichuti/issues) ![Docker](https://img.shields.io/badge/Docker-Supported-2496ED?style=flat-square&logo=docker) ![AI](https://img.shields.io/badge/Model-DeepSeek/Kimi-67C23A?style=flat-square) [![License](https://img.shields.io/badge/License-MIT-success?style=flat-square)](https://opensource.org/licenses/MIT)
 
 ---
 
@@ -137,8 +120,3 @@ aichuti/
 请确保您使用的是最新版本的后端代码。系统内置了强大的正则翻译官，如果发现新符号无法识别，可提交 Issue，我们会快速扩充翻译字典。
 </details>
 
----
-
-<p align="center">
-  中职老师专属的 AI 出题神器 | 基于 FastAPI 与 Docker 构建 | MIT License
-</p>
