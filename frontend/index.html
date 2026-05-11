@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>《建筑材料》AI 专属出题系统</title>
+    <script>
+        window.onerror = function(msg, src, line, col, err) {
+            document.write('<div style="background:#fef0f0;color:#f56c6c;padding:30px;font-size:18px;"><h1>页面发生致命错误导致白屏</h1><p><b>错误原因:</b> ' + msg + '</p><p><b>出错位置:</b> 第 ' + line + ' 行</p></div>');
+        };
+    </script>
     <link rel="stylesheet" href="./assets/index.min.css" />
     <link rel="stylesheet" href="./assets/katex.min.css" />
     <script src="./assets/vue.global.prod.js"></script>
@@ -48,12 +53,11 @@
 5. 【数学公式与符号规范】：凡是涉及物理量符号（如 $\rho$、$f_{cu}$）、计算公式或化学方程式的，必须严格使用 LaTeX 格式。行内公式使用 $...$ 包裹，独立公式使用 $$...$$ 包裹。例如：$f_{cu} = \frac{F}{A}$。
 
 # Constraint (极其严苛的格式与防错约束)
-⚠️ 最高级别警告（违反将导致系统报错）：
 1. 【强制 Markdown 代码块包裹】：你生成的所有试卷内容，必须全部包裹在一个唯一的 Markdown 代码块中输出。你的回复必须且只能以 ```markdown 开头，以 ``` 结尾。代码块外部绝对禁止出现任何寒暄、总结等闲聊废话。
 2. 【禁用引用标记】：严禁在输出中包含任何形式的引文标记或引用脚注，例如：[1] 等。输出必须是干净、纯粹的教学文字。
 3. 【解析绝对单行】：<details> 标签块内部（含答案与解析）严禁出现任何物理换行符（回车键）。
 4. 【隐藏考点标签】：必须在 <b>答案：</b>[选项] 之后，插入一个隐藏的 span 标签来记录知识点，格式严格为：<span class="point-tag" style="display:none;" data-point="[本题核心考点]"></span>。
-5. 【HTML 结构】：必须严格遵循拼装（绝对不能换行）：<details><summary>🔎 点击查看答案与解析</summary><blockquote><b>答案：</b>[选项]<span class="point-tag" style="display:none;" data-point="[核心考点]"></span><br><b>解析：</b>[内容]</blockquote></details>
+5. 【HTML 结构】：必须严格遵循拼装（绝对不能换行）：<details><summary> 点击查看答案与解析</summary><blockquote><b>答案：</b>[选项]<span class="point-tag" style="display:none;" data-point="[核心考点]"></span><br><b>解析：</b>[内容]</blockquote></details>
 6. 【分段逻辑】：解析内容如需分段，必须且只能使用 <br>，绝对禁止敲击回车。
 
 # 试卷格式模板（必须在代码块内体现）
@@ -63,13 +67,13 @@ A. [选项1]
 B. [选项2]
 C. [选项3]
 D. [选项4]
-<details><summary>🔎 点击查看答案与解析</summary><blockquote><b>答案：</b>[正确字母]<span class="point-tag" style="display:none;" data-point="[核心考点]"></span><br><b>解析：</b>[单行解析内容，严禁引用标记，严禁换行]</blockquote></details>
+<details><summary> 点击查看答案与解析</summary><blockquote><b>答案：</b>[正确字母]<span class="point-tag" style="display:none;" data-point="[核心考点]"></span><br><b>解析：</b>[单行解析内容，严禁引用标记，严禁换行]</blockquote></details>
 
 ## 2. 判断题格式
 **[题号]. [判断]** [结合实际工程背景的题干]
 正确
 错误
-<details><summary>🔎 点击查看答案与解析</summary><blockquote><b>答案：</b>[正确/错误]<span class="point-tag" style="display:none;" data-point="[核心考点]"></span><br><b>解析：</b>[单行解析内容，严禁引用标记，严禁换行]</blockquote></details>
+<details><summary> 点击查看答案与解析</summary><blockquote><b>答案：</b>[正确/错误]<span class="point-tag" style="display:none;" data-point="[核心考点]"></span><br><b>解析：</b>[单行解析内容，严禁引用标记，严禁换行]</blockquote></details>
 
 ## 3. 多选题格式
 **[题号]. [多选]** [结合实际工程背景的题干]
@@ -77,7 +81,7 @@ A. [选项1]
 B. [选项2]
 C. [选项3]
 D. [选项4]
-<details><summary>🔎 点击查看答案与解析</summary><blockquote><b>答案：</b>[连续大写字母]<span class="point-tag" style="display:none;" data-point="[核心考点]"></span><br><b>解析：</b>[单行解析内容，严禁引用标记，严禁换行]</blockquote></details>
+<details><summary> 点击查看答案与解析</summary><blockquote><b>答案：</b>[连续大写字母]<span class="point-tag" style="display:none;" data-point="[核心考点]"></span><br><b>解析：</b>[单行解析内容，严禁引用标记，严禁换行]</blockquote></details>
     </script>
 
     <div id="app" v-cloak>
@@ -92,11 +96,11 @@ D. [选项4]
         <div v-else class="app-container">
             <h1 class="header-title">🛠️ 建筑材料 AI 命题中心 (全净输出版)</h1>
             <el-tabs v-model="activeTab">
-                <el-tab-pane label="🤖 AI 智能出题" name="exam">
+                <el-tab-pane label="AI 智能出题" name="exam">
                     <el-row :gutter="20">
                         <el-col :span="9">
                             <el-card shadow="hover">
-                                <template #header><span>🎯 出题控制台</span></template>
+                                <template #header><span>出题控制台</span></template>
                                 <el-form label-position="top">
                                     <el-form-item label="1. 指定出题范围 (文件夹)">
                                         <el-select v-model="examForm.category" placeholder="请选择资料" style="width: 100%;">
@@ -110,10 +114,10 @@ D. [选项4]
 
                                     <el-form-item label="3. 核心出题提示词">
                                         <el-input type="textarea" :rows="14" v-model="examForm.promptTemplate"></el-input>
-                                        <el-button type="info" link @click="resetPrompt" style="float: right; margin-top: 5px;">🔄 恢复默认提示词</el-button>
+                                        <el-button type="info" link @click="resetPrompt" style="float: right; margin-top: 5px;">恢复默认提示词</el-button>
                                     </el-form-item>
                                     <el-button type="primary" style="width: 100%; height: 50px;" @click="generateExam" :loading="isGenerating">
-                                        {{ isGenerating ? '🚀 系统运行中，详见右侧监控...' : '🚀 一键生成 100分 试卷' }}
+                                        {{ isGenerating ? '引擎全开运作中，详见右侧监控...' : '一键生成 100分 试卷' }}
                                     </el-button>
                                 </el-form>
                             </el-card>
@@ -126,11 +130,11 @@ D. [选项4]
                             <el-card shadow="hover">
                                 <template #header>
                                     <div class="card-header-flex">
-                                        <span>📄 纯净试卷输出区</span>
+                                        <span>纯净试卷输出区</span>
                                         <div>
-                                            <el-button type="primary" size="small" @click="downloadWord('student')" :disabled="!rawMarkdown || isGenerating">📥 下载学生版</el-button>
-                                            <el-button type="danger" size="small" @click="downloadWord('teacher')" :disabled="!rawMarkdown || isGenerating">📥 下载教师版</el-button>
-                                            <el-button type="success" size="small" @click="copyMarkdown" :disabled="!rawMarkdown || isGenerating">📋 一键复制</el-button>
+                                            <el-button type="primary" size="small" @click="downloadWord('student')" :disabled="!rawMarkdown || isGenerating">下载学生版</el-button>
+                                            <el-button type="danger" size="small" @click="downloadWord('teacher')" :disabled="!rawMarkdown || isGenerating">下载教师版</el-button>
+                                            <el-button type="success" size="small" @click="copyMarkdown" :disabled="!rawMarkdown || isGenerating">一键复制</el-button>
                                         </div>
                                     </div>
                                 </template>
@@ -140,9 +144,9 @@ D. [选项4]
                     </el-row>
                 </el-tab-pane>
                 
-                <el-tab-pane label="📚 资料管理" name="docs">
+                <el-tab-pane label="资料管理" name="docs">
                     <div style="background:#f0f9eb; padding:15px; margin-bottom:10px; border-radius:5px; display:flex; align-items:center;">
-                        📂 <el-input v-model="newFolderName" placeholder="新分类" style="width:200px; margin:0 10px;"></el-input>
+                        <el-input v-model="newFolderName" placeholder="新分类" style="width:200px; margin:0 10px;"></el-input>
                         <el-button type="success" @click="addFolder">新建分类</el-button>
                     </div>
                     
@@ -150,7 +154,7 @@ D. [选项4]
                         <el-select v-model="uploadFolder" placeholder="请选择要操作的文件夹" style="flex:1;">
                             <el-option v-for="item in folders" :key="item" :label="item" :value="item"></el-option>
                         </el-select>
-                        <el-button type="danger" @click="deleteFolder" :disabled="!uploadFolder">🗑️ 彻底删除该分类</el-button>
+                        <el-button type="danger" @click="deleteFolder" :disabled="!uploadFolder">彻底删除该分类</el-button>
                     </div>
 
                     <el-upload drag action="/api/upload_docs/" multiple :data="{category: uploadFolder}" v-model:file-list="serverFileList" :on-success="()=>fetchFiles(uploadFolder)" :before-remove="handleRemove">
@@ -158,14 +162,32 @@ D. [选项4]
                     </el-upload>
                 </el-tab-pane>
                 
-                <el-tab-pane label="⚙️ API 配置" name="settings">
-                    <el-form label-width="100px">
-                        <el-form-item label="API URL"><el-input v-model="config.apiUrl"></el-input></el-form-item>
-                        <el-form-item label="API Key"><el-input v-model="config.apiKey" type="password" show-password></el-input></el-form-item>
-                        <el-form-item label="模型名称"><el-input v-model="config.modelName"></el-input></el-form-item>
-                        <el-button type="primary" @click="verifyApi" :loading="isVerifying">⚡ 验证连接</el-button>
-                        <el-button type="success" @click="saveSettings">💾 保存配置</el-button>
-                    </el-form>
+                <el-tab-pane label="API 配置" name="settings">
+                    <el-row :gutter="20">
+                        <el-col :span="12">
+                            <el-card shadow="hover" style="border-left: 4px solid #67C23A; margin-bottom: 20px;">
+                                <template #header><span style="font-weight: bold;">1 号模型：资料提取官</span></template>
+                                <el-form label-width="80px">
+                                    <el-form-item label="API URL"><el-input v-model="config.readerUrl"></el-input></el-form-item>
+                                    <el-form-item label="API Key"><el-input v-model="config.readerKey" type="password" show-password></el-input></el-form-item>
+                                    <el-form-item label="模型名称"><el-input v-model="config.readerModel"></el-input></el-form-item>
+                                    <el-button type="primary" @click="verifyApi('reader')" :loading="isVerifyingR">验证 1 号连接</el-button>
+                                </el-form>
+                            </el-card>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-card shadow="hover" style="border-left: 4px solid #409EFF; margin-bottom: 20px;">
+                                <template #header><span style="font-weight: bold;">2 号模型：专家命题官</span></template>
+                                <el-form label-width="80px">
+                                    <el-form-item label="API URL"><el-input v-model="config.creatorUrl"></el-input></el-form-item>
+                                    <el-form-item label="API Key"><el-input v-model="config.creatorKey" type="password" show-password></el-input></el-form-item>
+                                    <el-form-item label="模型名称"><el-input v-model="config.creatorModel"></el-input></el-form-item>
+                                    <el-button type="primary" @click="verifyApi('creator')" :loading="isVerifyingC">验证 2 号连接</el-button>
+                                </el-form>
+                            </el-card>
+                        </el-col>
+                    </el-row>
+                    <el-button type="success" size="large" style="width: 100%; margin-top: 10px;" @click="saveSettings">保存全局配置</el-button>
                 </el-tab-pane>
             </el-tabs>
         </div>
@@ -188,7 +210,8 @@ D. [选项4]
 
                 const activeTab = ref('exam');
                 const isGenerating = ref(false);
-                const isVerifying = ref(false);
+                const isVerifyingR = ref(false);
+                const isVerifyingC = ref(false);
                 const rawMarkdown = ref('');
                 const statusLog = ref('');
                 
@@ -196,7 +219,15 @@ D. [选项4]
                 const newFolderName = ref('');
                 const uploadFolder = ref('');
                 const serverFileList = ref([]);
-                const config = ref({ apiUrl: localStorage.getItem('api_url') || '', apiKey: localStorage.getItem('api_key') || '', modelName: localStorage.getItem('model_name') || '' });
+                
+                const config = ref({ 
+                    readerUrl: localStorage.getItem('r_api_url') || '', 
+                    readerKey: localStorage.getItem('r_api_key') || '', 
+                    readerModel: localStorage.getItem('r_model_name') || '',
+                    creatorUrl: localStorage.getItem('c_api_url') || '', 
+                    creatorKey: localStorage.getItem('c_api_key') || '', 
+                    creatorModel: localStorage.getItem('c_model_name') || ''
+                });
                 
                 const examForm = ref({ 
                     category: '', 
@@ -228,7 +259,7 @@ D. [选项4]
                 const handleRemove = async (uploadFile) => {
                     if (!uploadFolder.value) return false;
                     try {
-                        await ElementPlus.ElMessageBox.confirm(`确定要从服务器硬盘彻底删除文件【${uploadFile.name}】吗？`, '警告', { confirmButtonText: '彻底删除', cancelButtonText: '取消', type: 'warning' });
+                        await ElementPlus.ElMessageBox.confirm('确定要彻底删除文件吗？', '警告', { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' });
                         await axios.post('/api/delete_doc/', { category: uploadFolder.value, filename: uploadFile.name });
                         ElementPlus.ElMessage.success('文件物理删除成功！');
                         return true; 
@@ -254,8 +285,9 @@ D. [选项4]
 
                 const getCleanMarkdown = () => {
                     let cleanText = rawMarkdown.value || '';
-                    cleanText = cleanText.replace(/```[a-zA-Z]*\n?/gi, '').replace(/```/g, '');
-                    cleanText = cleanText.replace(/\n*❌\s*AI\s*在出题过程中报错[\s\S]*$/gi, '');
+                    cleanText = cleanText.replace(new RegExp('```[a-zA-Z]*\\n?', 'gi'), '');
+                    cleanText = cleanText.replace(new RegExp('```', 'g'), '');
+                    cleanText = cleanText.replace(new RegExp('\\n*\\[错误\\]\\s*遇到异常中止[\\s\\S]*$', 'gi'), '');
                     return cleanText.trim();
                 };
 
@@ -276,11 +308,9 @@ D. [选项4]
                 const deleteFolder = async () => {
                     if (!uploadFolder.value) return;
                     try {
-                        await ElementPlus.ElMessageBox.confirm(`确定要彻底删除分类【${uploadFolder.value}】及文件吗？`, '警告', { confirmButtonText: '彻底删除', cancelButtonText: '取消', type: 'error' });
+                        await ElementPlus.ElMessageBox.confirm('确定要彻底删除分类及文件吗？', '警告', { confirmButtonText: '删除', cancelButtonText: '取消', type: 'error' });
                         await axios.post('/api/delete_folder/', { category: uploadFolder.value });
-                        
                         await fetchFolders(); 
-                        
                         if (examForm.value.category === uploadFolder.value) examForm.value.category = '';
                         uploadFolder.value = ''; serverFileList.value = [];
                         ElementPlus.ElMessage.success('分类已彻底删除！');
@@ -306,8 +336,9 @@ D. [选项4]
 
                 const generateExam = async () => {
                     if (!examForm.value.category) return ElementPlus.ElMessage.warning('请选择资料文件夹');
-                    if (!config.value.apiUrl || !config.value.apiKey || !config.value.modelName) {
-                        ElementPlus.ElMessage.warning('请先去【API 配置】填写完整配置！');
+                    
+                    if (!config.value.readerUrl || !config.value.readerKey || !config.value.readerModel || !config.value.creatorUrl || !config.value.creatorKey || !config.value.creatorModel) {
+                        ElementPlus.ElMessage.warning('请先去配置页填写完整配置！');
                         activeTab.value = 'settings';
                         return;
                     }
@@ -321,9 +352,12 @@ D. [选项4]
                     
                     try {
                         const payload = { 
-                            api_url: String(config.value.apiUrl || ''), 
-                            api_key: String(config.value.apiKey || ''), 
-                            model_name: String(config.value.modelName || ''), 
+                            reader_api_url: String(config.value.readerUrl || ''), 
+                            reader_api_key: String(config.value.readerKey || ''), 
+                            reader_model_name: String(config.value.readerModel || ''), 
+                            creator_api_url: String(config.value.creatorUrl || ''), 
+                            creator_api_key: String(config.value.creatorKey || ''), 
+                            creator_model_name: String(config.value.creatorModel || ''), 
                             category: String(examForm.value.category || ''), 
                             prompt_template: String(examForm.value.promptTemplate || ''),
                             use_ocr: Boolean(examForm.value.useOcr)
@@ -331,18 +365,15 @@ D. [选项4]
 
                         const response = await fetch('/api/generate_exam/', {
                             method: 'POST', 
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json, text/plain, */*'
-                            }, 
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json, text/plain, */*' }, 
                             body: JSON.stringify(payload)
                         });
 
                         if (!response.ok) {
-                            let errorDetail = `HTTP ${response.status}`;
+                            let errorDetail = 'HTTP ' + response.status;
                             try {
                                 const errData = await response.json();
-                                errorDetail += ` | 详细原因: ${JSON.stringify(errData.detail || errData)}`;
+                                errorDetail += ' | 详细原因: ' + JSON.stringify(errData.detail || errData);
                             } catch (parseErr) {}
                             throw new Error(errorDetail);
                         }
@@ -356,25 +387,54 @@ D. [选项4]
                             
                             let chunk = decoder.decode(value, { stream: true });
 
+                            if (chunk.includes('[__ERROR__:')) {
+                                let errMsg = chunk.match(/\[__ERROR__:(.*?)\]/);
+                                if (errMsg) statusLog.value += '\n\n[错误] 遇到异常中止: ' + errMsg[1];
+                                continue;
+                            }
+
+                            if (chunk.includes('[__CONTINUATION__]')) {
+                                statusLog.value += '\n\n[系统提示] 模型单次输出达上限，正在无缝接力续写，已为您自动修剪断裂的排版...';
+                                chunk = chunk.replace(/\[__CONTINUATION__\]/g, '');
+                                
+                                // 👉 与后端同步的最强手术刀！
+                                const regex = new RegExp('(?:^|\\n)\\s*\\*?\\*?\\s*\\d{1,3}\\s*\\.\\s*(?:\\\[|【)', 'g');
+                                let match;
+                                let lastIndex = -1;
+                                while ((match = regex.exec(rawMarkdown.value)) !== null) {
+                                    lastIndex = match.index;
+                                }
+                                if (lastIndex !== -1) {
+                                    rawMarkdown.value = rawMarkdown.value.substring(0, lastIndex);
+                                }
+                                nextTick(() => { let el = document.getElementById('status-box-container'); if(el) el.scrollTop = el.scrollHeight; });
+                                if (!chunk.trim()) continue;
+                            }
+
+                            if (chunk.includes('[__HB__:')) {
+                                chunk = chunk.replace(/\[__HB__:.*?\]\n*/g, '');
+                                if (!chunk.trim()) continue;
+                            }
+                            if (chunk.includes('[__INIT_FLUSH__:')) {
+                                chunk = chunk.replace(/\[__INIT_FLUSH__:.*?\]\n*/g, '');
+                            }
+
                             if (!isExamContent) {
                                 statusLog.value += chunk;
                                 if (statusLog.value.includes('---\n\n')) {
                                     isExamContent = true;
                                     let parts = statusLog.value.split('---\n\n');
-                                    statusLog.value = parts[0] + '✅ 试卷正在疯狂打印中，请看下方区域...';
+                                    statusLog.value = parts[0] + '[成功] 试卷正在打印中，请看下方区域...';
                                     rawMarkdown.value = parts[1] || '';
                                 }
-                                nextTick(() => {
-                                    let el = document.getElementById('status-box-container');
-                                    if(el) el.scrollTop = el.scrollHeight;
-                                });
+                                nextTick(() => { let el = document.getElementById('status-box-container'); if(el) el.scrollTop = el.scrollHeight; });
                             } else {
                                 rawMarkdown.value += chunk;
                             }
                         }
-                        ElementPlus.ElMessage.success('试卷生成完毕！快去下载 Word 吧！');
+                        ElementPlus.ElMessage.success('试卷生成完毕！');
                     } catch (e) { 
-                        statusLog.value += '\n\n❌ 请求被拦截：' + e.message;
+                        statusLog.value += '\n\n[错误] 请求被拦截：' + e.message;
                     } finally { 
                         isGenerating.value = false; 
                     }
@@ -386,24 +446,49 @@ D. [选项4]
                     catch (err) { const t = document.createElement('textarea'); t.value = cleanText; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); ElementPlus.ElMessage.success('复制成功！'); }
                 };
 
-                const verifyApi = async () => {
-                    if (!config.value.apiUrl) return ElementPlus.ElMessage.error('请填写完整信息');
-                    isVerifying.value = true;
+                const verifyApi = async (type) => {
+                    let testUrl, testKey, testModel;
+                    if (type === 'reader') {
+                        testUrl = config.value.readerUrl; testKey = config.value.readerKey; testModel = config.value.readerModel;
+                        isVerifyingR.value = true;
+                    } else {
+                        testUrl = config.value.creatorUrl; testKey = config.value.creatorKey; testModel = config.value.creatorModel;
+                        isVerifyingC.value = true;
+                    }
+
+                    if (!testUrl || !testKey || !testModel) {
+                        if (type === 'reader') isVerifyingR.value = false; else isVerifyingC.value = false;
+                        return ElementPlus.ElMessage.error('请填写完整信息');
+                    }
+                    
                     try {
-                        const res = await axios.post('/api/verify_api/', { api_url: config.value.apiUrl, api_key: config.value.apiKey, model_name: config.value.modelName });
+                        const res = await axios.post('/api/verify_api/', { api_url: testUrl, api_key: testKey, model_name: testModel });
                         if (res.data.status === 'success') ElementPlus.ElMessage.success(res.data.message);
                         else ElementPlus.ElMessage.error(res.data.message);
-                    } catch (e) { ElementPlus.ElMessage.error('网络请求失败'); } finally { isVerifying.value = false; }
+                    } catch (e) { 
+                        ElementPlus.ElMessage.error('网络请求失败'); 
+                    } finally { 
+                        if (type === 'reader') isVerifyingR.value = false; else isVerifyingC.value = false;
+                    }
                 };
 
                 const parsedMarkdown = computed(() => {
                     return marked.parse(getCleanMarkdown());
                 });
 
-                const saveSettings = () => { localStorage.setItem('api_url', config.value.apiUrl); localStorage.setItem('api_key', config.value.apiKey); localStorage.setItem('model_name', config.value.modelName); ElementPlus.ElMessage.success('配置已保存');};
+                const saveSettings = () => { 
+                    localStorage.setItem('r_api_url', config.value.readerUrl); 
+                    localStorage.setItem('r_api_key', config.value.readerKey); 
+                    localStorage.setItem('r_model_name', config.value.readerModel); 
+                    localStorage.setItem('c_api_url', config.value.creatorUrl); 
+                    localStorage.setItem('c_api_key', config.value.creatorKey); 
+                    localStorage.setItem('c_model_name', config.value.creatorModel); 
+                    ElementPlus.ElMessage.success('配置已保存');
+                };
+                
                 const resetPrompt = () => { examForm.value.promptTemplate = DEFAULT_PROMPT; localStorage.removeItem('custom_prompt_v7'); ElementPlus.ElMessage.success('已恢复默认约束！'); };
 
-                return { isLoggedIn, loginPassword, handleLogin, activeTab, isGenerating, isVerifying, rawMarkdown, statusLog, folders, newFolderName, uploadFolder, serverFileList, config, examForm, generateExam, parsedMarkdown, addFolder, saveSettings, resetPrompt, downloadWord, deleteFolder, fetchFiles, copyMarkdown, verifyApi, handleRemove };
+                return { isLoggedIn, loginPassword, handleLogin, activeTab, isGenerating, isVerifyingR, isVerifyingC, rawMarkdown, statusLog, folders, newFolderName, uploadFolder, serverFileList, config, examForm, generateExam, parsedMarkdown, addFolder, saveSettings, resetPrompt, downloadWord, deleteFolder, fetchFiles, copyMarkdown, verifyApi, handleRemove };
             }
         });
         app.use(ElementPlus); app.mount('#app');
